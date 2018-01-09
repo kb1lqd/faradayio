@@ -24,8 +24,10 @@
 #define CBUS2_STATE 0x4
 #define CBUS3_STATE 0x8
 
-unsigned char VendorId = 0x0403;
-unsigned char ProductId = 0x6015;
+#define delaytime 1 //second(s)
+
+unsigned long vendorid = 0x0403; // FTDI
+unsigned long productid = 0x6015; //FT230x
 unsigned  char cbusbitmask = 0x00;
 
 
@@ -41,6 +43,9 @@ int main(void)
         return EXIT_FAILURE;
     }
 
+    printf("Vendor ID: %#010x\n",vendorid);
+    printf("Product ID: %#010x\n",productid);
+
     f = ftdi_usb_open(ftdi, 0x0403, 0x6015);
     if (f < 0 && f != -5)
     {
@@ -52,30 +57,13 @@ int main(void)
 
     // Set CBUS bitmask direction nibble
     SetCbusDirection(0x03); // 0x03 = 0011b which is bitshifted up to 00110011b
-	//bitmask = CBUS0_DIR | CBUS0_STATE;
-	//printf("Using bitmask 0x%02x\n", bitmask);
 
 	// Perform Faraday CC430 BSL TEST/RST toggle initialization routine
-    EnableCBUS0();
-	f = ftdi_set_bitmode(ftdi, cbusbitmask, BITMODE_CBUS);
-	sleep(3);
-
-	DisableCBUS0();
-	f = ftdi_set_bitmode(ftdi, cbusbitmask, BITMODE_CBUS);
-	sleep(3);
-
-	EnableCBUS0();
-	f = ftdi_set_bitmode(ftdi, cbusbitmask, BITMODE_CBUS);
-	sleep(3);
-
-	DisableCBUS0();
-	f = ftdi_set_bitmode(ftdi, cbusbitmask, BITMODE_CBUS);
-	sleep(3);
+    EnableFaradayBslMode(ftdi);
 
 	// Disable bitbang mode and disconnect from device
     printf("disabling bitbang mode\n");
     ftdi_disable_bitbang(ftdi);
-
     ftdi_usb_close(ftdi);
     ftdi_free(ftdi);
 
@@ -130,5 +118,49 @@ int DisableCBUS1(void){
 	printf("DISABLECBUS0: CBUS Bitmask = 0x%02x\n", cbusbitmask);
 
 	//Return
+	return 0;
+}
+
+int EnableFaradayBslMode(struct ftdi_context *ftdi){
+	// Toggles CBUS pins to place CC430 in BSL mode
+	// CBUS Assignments:
+	//      RST = CBUS0
+	//      TEST = CBUS1
+
+	// Initial delay
+	printf("Enabling Faraday BSL Mode!\n");
+	sleep(delaytime);
+
+	//RESET LOW
+	DisableCBUS0();
+	ftdi_set_bitmode(ftdi, cbusbitmask, BITMODE_CBUS);
+	sleep(delaytime);
+
+	//TEST HIGH
+	EnableCBUS1();
+	ftdi_set_bitmode(ftdi, cbusbitmask, BITMODE_CBUS);
+	sleep(delaytime);
+
+	//TEST LOW
+	DisableCBUS1();
+	ftdi_set_bitmode(ftdi, cbusbitmask, BITMODE_CBUS);
+	sleep(delaytime);
+
+	//TEST HIGH
+	EnableCBUS1();
+	ftdi_set_bitmode(ftdi, cbusbitmask, BITMODE_CBUS);
+	sleep(delaytime);
+
+	//RESET HIGH
+	EnableCBUS0();
+	ftdi_set_bitmode(ftdi, cbusbitmask, BITMODE_CBUS);
+	sleep(delaytime);
+
+	//TEST LOW
+	DisableCBUS1();
+	ftdi_set_bitmode(ftdi, cbusbitmask, BITMODE_CBUS);
+	sleep(delaytime);
+
+	// Return
 	return 0;
 }
