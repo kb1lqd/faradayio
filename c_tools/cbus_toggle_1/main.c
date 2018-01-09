@@ -71,12 +71,20 @@ int main( int argc, char *argv[] )
 			// Enable BSL Mode
 			printf("MODE = Enable BSL");
 			EnableFaradayBslMode(ftdi);
+
+			//Set nominal mode
+			SetCbusDirection(0x00);
+			ftdi_set_bitmode(ftdi, cbusbitmask, BITMODE_CBUS);
 		}
 
 		else if(userinputmode == 0){
 			// Disable BSL Mode
 			printf("MODE = Disable BSL");
 			DisableFaradayBslMode(ftdi);
+
+			//Set nominal mode
+			SetCbusDirection(0x00);
+			ftdi_set_bitmode(ftdi, cbusbitmask, BITMODE_CBUS);
 			}
 
 		else{
