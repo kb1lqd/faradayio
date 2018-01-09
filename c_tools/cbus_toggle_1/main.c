@@ -31,41 +31,65 @@ unsigned long productid = 0x6015; //FT230x
 unsigned  char cbusbitmask = 0x00;
 
 
-int main(void)
+int main( int argc, char *argv[] )
 {
-	// Setup and connect to device
-    struct ftdi_context *ftdi;
-    int f;
+	printf("argc: %d\n",argc);
+	printf("argv: %s %d\n",argv[0], atoi(argv[1]));
+	if(argc != 2){
+		//Error correct operation requires 1 argument
+		fprintf(stderr, "ERROR: Correct operation requires 1 argument [0 = Disable BSL | 1 = Enable BSL]!");
+	}
+	else{
+		// Setup and connect to device
+		struct ftdi_context *ftdi;
+		int f;
 
-    if ((ftdi = ftdi_new()) == 0)
-    {
-        fprintf(stderr, "ftdi_new failed\n");
-        return EXIT_FAILURE;
-    }
+		if ((ftdi = ftdi_new()) == 0)
+		{
+			fprintf(stderr, "ftdi_new failed\n");
+			return EXIT_FAILURE;
+		}
 
-    printf("Vendor ID: %#010x\n",vendorid);
-    printf("Product ID: %#010x\n",productid);
+		printf("Vendor ID: %#010x\n",vendorid);
+		printf("Product ID: %#010x\n",productid);
 
-    f = ftdi_usb_open(ftdi, 0x0403, 0x6015);
-    if (f < 0 && f != -5)
-    {
-        fprintf(stderr, "unable to open ftdi device: %d (%s)\n", f, ftdi_get_error_string(ftdi));
-        ftdi_free(ftdi);
-        exit(-1);
-    }
-    printf("Successful Connection. FTDI open returned: %d\n",f);
+		f = ftdi_usb_open(ftdi, 0x0403, 0x6015);
+		if (f < 0 && f != -5)
+		{
+			fprintf(stderr, "unable to open ftdi device: %d (%s)\n", f, ftdi_get_error_string(ftdi));
+			ftdi_free(ftdi);
+			exit(-1);
+		}
+		printf("Successful Connection. FTDI open returned: %d\n",f);
 
-    // Set CBUS bitmask direction nibble
-    SetCbusDirection(0x03); // 0x03 = 0011b which is bitshifted up to 00110011b
+		// Set CBUS bitmask direction nibble
+		SetCbusDirection(0x03); // 0x03 = 0011b which is bitshifted up to 00110011b
 
-	// Perform Faraday CC430 BSL TEST/RST toggle initialization routine
-    EnableFaradayBslMode(ftdi);
+		// Perform Faraday CC430 BSL TEST/RST toggle initialization routine
+		unsigned char userinputmode = atoi(argv[1]);
+		if(userinputmode == 1){
+			// Enable BSL Mode
+			printf("MODE = Enable BSL");
+			EnableFaradayBslMode(ftdi);
+		}
 
-	// Disable bitbang mode and disconnect from device
-    printf("disabling bitbang mode\n");
-    ftdi_disable_bitbang(ftdi);
-    ftdi_usb_close(ftdi);
-    ftdi_free(ftdi);
+		else if(userinputmode == 0){
+			// Disable BSL Mode
+			printf("MODE = Disable BSL");
+			DisableFaradayBslMode(ftdi);
+			}
+
+		else{
+			fprintf(stderr, "ERROR: Incorrect argument value of %d [0 = Disable BSL | 1 = Enable BSL]!", argv[2]);
+		}
+
+
+		// Disable bitbang mode and disconnect from device
+		printf("disabling bitbang mode\n");
+		ftdi_disable_bitbang(ftdi);
+		ftdi_usb_close(ftdi);
+		ftdi_free(ftdi);
+	}
 
     return 0;
 }
