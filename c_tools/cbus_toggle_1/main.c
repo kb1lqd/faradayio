@@ -164,3 +164,53 @@ int EnableFaradayBslMode(struct ftdi_context *ftdi){
 	// Return
 	return 0;
 }
+
+int DisableFaradayBslMode(struct ftdi_context *ftdi){
+	//Toggle CBUS to leave BSL mode per Errata (Reset won't work)
+	// CBUS Assignments:
+	//      RST = CBUS0
+	//      TEST = CBUS1
+
+	//RESET HIGH TEST LOW
+	EnableCBUS0();
+	DisableCBUS1();
+	ftdi_set_bitmode(ftdi, cbusbitmask, BITMODE_CBUS);
+	sleep(delaytime);
+
+	//RESET HIGH TEST HIGH
+	EnableCBUS0();
+	EnableCBUS1();
+	ftdi_set_bitmode(ftdi, cbusbitmask, BITMODE_CBUS);
+	sleep(delaytime);
+
+	//RESET HIGH TEST LOW
+	EnableCBUS0();
+	DisableCBUS1();
+	ftdi_set_bitmode(ftdi, cbusbitmask, BITMODE_CBUS);
+	sleep(delaytime);
+
+	//RESET HIGH TEST HIGH
+	EnableCBUS0();
+	EnableCBUS1();
+	ftdi_set_bitmode(ftdi, cbusbitmask, BITMODE_CBUS);
+	sleep(delaytime);
+
+	//RESET HIGH TEST LOW
+	EnableCBUS0();
+	DisableCBUS1();
+	ftdi_set_bitmode(ftdi, cbusbitmask, BITMODE_CBUS);
+	sleep(delaytime);
+
+	//RESET LOW TEST LOW
+	DisableCBUS0();
+	DisableCBUS1();
+	ftdi_set_bitmode(ftdi, cbusbitmask, BITMODE_CBUS);
+	sleep(delaytime);
+
+	//RESET HIGH TEST LOW
+	EnableCBUS0();
+	DisableCBUS1();
+	ftdi_set_bitmode(ftdi, cbusbitmask, BITMODE_CBUS);
+	sleep(delaytime);
+
+}
