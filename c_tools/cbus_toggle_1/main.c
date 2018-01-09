@@ -12,9 +12,8 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <ftdi.h>
+#include "main.h"
 
-unsigned char VendorId = 0x0403;
-unsigned char ProductId = 0x6015;
 
 #define CBUS0_DIR 0x10
 #define CBUS1_DIR 0x20
@@ -25,13 +24,16 @@ unsigned char ProductId = 0x6015;
 #define CBUS2_STATE 0x4
 #define CBUS3_STATE 0x8
 
+unsigned char VendorId = 0x0403;
+unsigned char ProductId = 0x6015;
+unsigned  char cbusbitmask = 0x00;
+
+
 int main(void)
 {
+	// Setup and connect to device
     struct ftdi_context *ftdi;
     int f;
-    unsigned char buf[1];
-    unsigned char bitmask;
-    char input[10];
 
     if ((ftdi = ftdi_new()) == 0)
     {
@@ -46,31 +48,31 @@ int main(void)
         ftdi_free(ftdi);
         exit(-1);
     }
-    printf("ftdi open succeeded: %d\n",f);
+    printf("Successful Connection. FTDI open returned: %d\n",f);
 
-    while (1)
-    {
-        // Set bitmask from input
-    	//printf("Set bitmask from input: ");
-        //fgets(input, sizeof(input) - 1, stdin);
-        //if (input[0] == '\n') break;
-        //bitmask = strtol(input, NULL, 0);
-    	bitmask = CBUS0_DIR | CBUS0_STATE;
-        printf("Using bitmask 0x%02x\n", bitmask);
-        f = ftdi_set_bitmode(ftdi, bitmask, BITMODE_CBUS);
-        sleep(5);
-        bitmask = CBUS0_DIR;
-		printf("Using bitmask 0x%02x\n", bitmask);
-		f = ftdi_set_bitmode(ftdi, bitmask, BITMODE_CBUS);
-		sleep(5);
-//        if (f < 0)
-//        {
-//            fprintf(stderr, "set_bitmode failed for 0x%x, error %d (%s)\n", bitmask, f, ftdi_get_error_string(ftdi));
-//            ftdi_usb_close(ftdi);
-//            ftdi_free(ftdi);
-//            exit(-1);
-//        }
-    }
+    // Set CBUS bitmask direction nibble
+    SetCbusDirection(0x03); // 0x03 = 0011b which is bitshifted up to 00110011b
+	//bitmask = CBUS0_DIR | CBUS0_STATE;
+	//printf("Using bitmask 0x%02x\n", bitmask);
+
+	// Perform Faraday CC430 BSL TEST/RST toggle initialization routine
+    EnableCBUS0();
+	f = ftdi_set_bitmode(ftdi, cbusbitmask, BITMODE_CBUS);
+	sleep(3);
+
+	DisableCBUS0();
+	f = ftdi_set_bitmode(ftdi, cbusbitmask, BITMODE_CBUS);
+	sleep(3);
+
+	EnableCBUS0();
+	f = ftdi_set_bitmode(ftdi, cbusbitmask, BITMODE_CBUS);
+	sleep(3);
+
+	DisableCBUS0();
+	f = ftdi_set_bitmode(ftdi, cbusbitmask, BITMODE_CBUS);
+	sleep(3);
+
+	// Disable bitbang mode and disconnect from device
     printf("disabling bitbang mode\n");
     ftdi_disable_bitbang(ftdi);
 
@@ -78,4 +80,55 @@ int main(void)
     ftdi_free(ftdi);
 
     return 0;
+}
+
+int ConnectDevice(void){
+
+	// Return
+	return 0;
+}
+
+int SetCbusDirection(unsigned char bitmask){
+	//Accepts the nibble that is bitshifted  up to determine  if a CBUS port is input or output.
+	cbusbitmask = (bitmask<<4);
+	printf("CBUS Direction Bitmask = 0x%02x\n", cbusbitmask);
+
+	// Return
+	return 0;
+}
+
+int EnableCBUS0(void){
+	// Actuate CBUS 0 state HIGH
+	cbusbitmask |= CBUS0_STATE;
+	printf("ENABLECBUS0: CBUS Bitmask = 0x%02x\n", cbusbitmask);
+
+	//Return
+	return 0;
+}
+
+int EnableCBUS1(void){
+	// Actuate CBUS 1 state HIGH
+	cbusbitmask |= CBUS1_STATE;
+	printf("ENABLECBUS1: CBUS Bitmask = 0x%02x\n", cbusbitmask);
+
+	//Return
+	return 0;
+}
+
+int DisableCBUS0(void){
+	// Actuate CBUS 0 state LOW
+	cbusbitmask &= ~CBUS0_STATE;
+	printf("DISABLECBUS0: CBUS Bitmask = 0x%02x\n", cbusbitmask);
+
+	//Return
+	return 0;
+}
+
+int DisableCBUS1(void){
+	// Actuate CBUS 1 state LOW
+	cbusbitmask &= ~CBUS0_STATE;
+	printf("DISABLECBUS0: CBUS Bitmask = 0x%02x\n", cbusbitmask);
+
+	//Return
+	return 0;
 }
