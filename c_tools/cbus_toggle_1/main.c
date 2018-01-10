@@ -146,8 +146,8 @@ int DisableCBUS0(void){
 
 int DisableCBUS1(void){
 	// Actuate CBUS 1 state LOW
-	cbusbitmask &= ~CBUS0_STATE;
-	printf("DISABLECBUS0: CBUS Bitmask = 0x%02x\n", cbusbitmask);
+	cbusbitmask &= ~CBUS1_STATE;
+	printf("DISABLECBUS1: CBUS Bitmask = 0x%02x\n", cbusbitmask);
 
 	//Return
 	return 0;
@@ -163,34 +163,60 @@ int EnableFaradayBslMode(struct ftdi_context *ftdi){
 	printf("Enabling Faraday BSL Mode!\n");
 	sleep(delaytime);
 
-	//RESET LOW
+	//RESET LOW TEST LOW
 	DisableCBUS0();
-	ftdi_set_bitmode(ftdi, cbusbitmask, BITMODE_CBUS);
-	sleep(delaytime);
-
-	//TEST HIGH
-	EnableCBUS1();
-	ftdi_set_bitmode(ftdi, cbusbitmask, BITMODE_CBUS);
-	sleep(delaytime);
-
-	//TEST LOW
 	DisableCBUS1();
 	ftdi_set_bitmode(ftdi, cbusbitmask, BITMODE_CBUS);
+	printf("CBUS Bitmask = 0x%02x\n", cbusbitmask);
 	sleep(delaytime);
 
-	//TEST HIGH
+	//RESET LOW TEST HIGH
+	DisableCBUS0();
 	EnableCBUS1();
 	ftdi_set_bitmode(ftdi, cbusbitmask, BITMODE_CBUS);
+	printf("CBUS Bitmask = 0x%02x\n", cbusbitmask);
 	sleep(delaytime);
 
-	//RESET HIGH
+	//RESET LOW TEST LOW
+	DisableCBUS0();
+	DisableCBUS1();
+	ftdi_set_bitmode(ftdi, cbusbitmask, BITMODE_CBUS);
+	printf("CBUS Bitmask = 0x%02x\n", cbusbitmask);
+	sleep(delaytime);
+
+	//RESET LOW TEST HIGH
+	DisableCBUS0();
+	EnableCBUS1();
+	ftdi_set_bitmode(ftdi, cbusbitmask, BITMODE_CBUS);
+	printf("CBUS Bitmask = 0x%02x\n", cbusbitmask);
+	sleep(delaytime);
+
+	//RESET LOW TEST LOW
+	DisableCBUS0();
+	DisableCBUS1();
+	ftdi_set_bitmode(ftdi, cbusbitmask, BITMODE_CBUS);
+	printf("CBUS Bitmask = 0x%02x\n", cbusbitmask);
+	sleep(delaytime);
+
+	//RESET LOW TEST HIGH
+	DisableCBUS0();
+	EnableCBUS1();
+	ftdi_set_bitmode(ftdi, cbusbitmask, BITMODE_CBUS);
+	printf("CBUS Bitmask = 0x%02x\n", cbusbitmask);
+	sleep(delaytime);
+
+	//RESET HIGH TEST HIGH
 	EnableCBUS0();
+	EnableCBUS1();
 	ftdi_set_bitmode(ftdi, cbusbitmask, BITMODE_CBUS);
+	printf("CBUS Bitmask = 0x%02x\n", cbusbitmask);
 	sleep(delaytime);
 
-	//TEST LOW
+	//RESET HIGH TEST LOW
+	EnableCBUS0();
 	DisableCBUS1();
 	ftdi_set_bitmode(ftdi, cbusbitmask, BITMODE_CBUS);
+	printf("CBUS Bitmask = 0x%02x\n", cbusbitmask);
 	sleep(delaytime);
 
 	// Return
@@ -207,42 +233,49 @@ int DisableFaradayBslMode(struct ftdi_context *ftdi){
 	EnableCBUS0();
 	DisableCBUS1();
 	ftdi_set_bitmode(ftdi, cbusbitmask, BITMODE_CBUS);
+	printf("CBUS Bitmask = 0x%02x\n", cbusbitmask);
 	sleep(delaytime);
 
 	//RESET HIGH TEST HIGH
 	EnableCBUS0();
 	EnableCBUS1();
 	ftdi_set_bitmode(ftdi, cbusbitmask, BITMODE_CBUS);
+	printf("CBUS Bitmask = 0x%02x\n", cbusbitmask);
 	sleep(delaytime);
 
 	//RESET HIGH TEST LOW
 	EnableCBUS0();
 	DisableCBUS1();
 	ftdi_set_bitmode(ftdi, cbusbitmask, BITMODE_CBUS);
+	printf("CBUS Bitmask = 0x%02x\n", cbusbitmask);
 	sleep(delaytime);
 
 	//RESET HIGH TEST HIGH
 	EnableCBUS0();
 	EnableCBUS1();
 	ftdi_set_bitmode(ftdi, cbusbitmask, BITMODE_CBUS);
+	printf("CBUS Bitmask = 0x%02x\n", cbusbitmask);
 	sleep(delaytime);
 
 	//RESET HIGH TEST LOW
 	EnableCBUS0();
 	DisableCBUS1();
 	ftdi_set_bitmode(ftdi, cbusbitmask, BITMODE_CBUS);
+	printf("CBUS Bitmask = 0x%02x\n", cbusbitmask);
 	sleep(delaytime);
 
 	//RESET LOW TEST LOW
 	DisableCBUS0();
 	DisableCBUS1();
 	ftdi_set_bitmode(ftdi, cbusbitmask, BITMODE_CBUS);
+	printf("CBUS Bitmask = 0x%02x\n", cbusbitmask);
 	sleep(delaytime);
 
 	//RESET HIGH TEST LOW
 	EnableCBUS0();
 	DisableCBUS1();
 	ftdi_set_bitmode(ftdi, cbusbitmask, BITMODE_CBUS);
+	printf("CBUS Bitmask = 0x%02x\n", cbusbitmask);
 	sleep(delaytime);
 
 }
